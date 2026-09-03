@@ -30,6 +30,7 @@ const tests = [
 	'orgGuard.unit.test.js', // pure; asserts checkSingleTenant()'s logic offline
 	'provider.unit.test.js',   // pure/stubbed; asserts adapter normalisation, error classes, abort (W-L 10.7)
 	'agentLoop.unit.test.js', // stubbed; six loop scenarios including cap, retry, abort and timeout (W-L 11.5)
+        'agentRoutes.test.js', // HTTP-level; offline SSE/auth/flag/heartbeat checks (W-L 11.6)
 ]
 // api.smoke.test.js only runs when BASE_URL is set (otherwise localhost would fail).
 if (process.env.BASE_URL) tests.push('api.smoke.test.js')
