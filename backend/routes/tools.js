@@ -1,15 +1,6 @@
 const express = require('express')
 const router = express.Router()
-let _supabase = null
-try {
-  _supabase = require('../supabase')
-} catch (_) {
-  _supabase = null
-}
-function requireSupabase() {
-  if (!_supabase) throw new Error('routes/tools requires Supabase; none is configured')
-  return _supabase
-}
+const supabase = require('../supabase')
 const { optional } = require('../lib/supabaseQuery')
 const { maxLevel } = require('../domain/definitions')
 
@@ -32,7 +23,6 @@ const { maxLevel } = require('../domain/definitions')
 
 /** platform_id -> { users: [name], departments: Set<dept> }, via tool_users -> employees */
 async function loadPlatformUsers() {
-  const supabase = requireSupabase()
   const links = await optional('tool_users', supabase
     .from('tool_users')
     .select('platform_id, employees ( name, department )'), [])
@@ -50,7 +40,6 @@ async function loadPlatformUsers() {
 
 /** platform_id -> owner name, via tool_ownership -> employees */
 async function loadPlatformOwners() {
-  const supabase = requireSupabase()
   const data = await optional('tool_ownership', supabase.from('tool_ownership').select('platform_id, employees ( name )'), [])
   const byPlatform = {}
   for (const r of data) {
@@ -61,7 +50,6 @@ async function loadPlatformOwners() {
 
 /** platform_id -> backup tool name, via tool_backups -> ai_platforms */
 async function loadPlatformBackups(platforms) {
-  const supabase = requireSupabase()
   const backups = await optional('tool_backups', supabase.from('tool_backups').select('primary_platform, backup_platform'), [])
   const nameById = Object.fromEntries(platforms.map((p) => [p.id, p.name]))
   const byPlatform = {}
@@ -71,7 +59,6 @@ async function loadPlatformBackups(platforms) {
 
 /** platform_id -> { documented, criticality }, via knowledge_assets where asset_type='platform' */
 async function loadPlatformKnowledge() {
-  const supabase = requireSupabase()
   const data = await optional('knowledge_assets(platform)', supabase.from('knowledge_assets').select('*').eq('asset_type', 'platform'), [])
 
   // A platform can have several knowledge assets. The previous version assigned
@@ -93,7 +80,6 @@ async function loadPlatformKnowledge() {
 
 /** platform_id -> [agent name], via agent_platform -> agents */
 async function loadPlatformAgents() {
-  const supabase = requireSupabase()
   const links = await optional('agent_platform', supabase.from('agent_platform').select('platform_id, agents ( name )'), [])
   const byPlatform = {}
   for (const l of links) {
@@ -105,7 +91,6 @@ async function loadPlatformAgents() {
 
 /** platform_id -> [workflow name], via workflow_tool_dependencies -> workflows */
 async function loadPlatformWorkflows() {
-  const supabase = requireSupabase()
   const links = await optional('workflow_tool_dependencies', supabase.from('workflow_tool_dependencies').select('platform_id, workflows ( name )'), [])
   const byPlatform = {}
   for (const l of links) {
@@ -184,7 +169,6 @@ function toolRiskTier(score) {
 /** The enriched tool list — pulled out so other routes (decisionIntelligence.js)
  *  can reuse this exact computation instead of re-deriving it. */
 async function loadEnrichedTools() {
-  const supabase = requireSupabase()
   const { data: platforms, error } = await supabase.from('ai_platforms').select('*')
   if (error) throw new Error(`ai_platforms: ${error.message}`)
 
