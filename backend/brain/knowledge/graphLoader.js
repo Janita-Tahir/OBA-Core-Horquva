@@ -45,13 +45,28 @@
  * W6 still has to stop M42 rendering it as a flat "siloed" verdict.
  */
 
-const supabase = require('../../supabase')
+// Resolved defensively, matching domain/index.js: supabase.js constructs its
+// client at module load and throws without SUPABASE_URL, so a bare require
+// here took out every test that merely requires brain/ — including
+// brain.smoke and intelligence.verify, both of which run against
+// tests/fixtures/graph.js and need no database at all.
+let _supabase = null
+try {
+  _supabase = require('../../supabase')
+} catch (_) {
+  _supabase = null
+}
+function requireSupabase() {
+  if (!_supabase) throw new Error('loadFromSupabase requires Supabase; none is configured')
+  return _supabase
+} 
 const { loadOwnerBackupByEmployee } = require('../../lib/ownerBackups')
 const { deriveCollaborations } = require('../../lib/deriveCollaborations')
 
 const EXEC_TITLE = /^(VP|COO|CFO|CEO|CTO|Head of|Chief|President|Director)/i
 
 async function loadFromSupabase(graph) {
+  const supabase = requireSupabase()
   const E = (spec) => graph.addEntity(spec)
   const R = (from, type, to, extra = {}) => {
     if (!from || !to) return null
