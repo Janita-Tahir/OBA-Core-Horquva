@@ -131,6 +131,7 @@ async function runTurn({ turnContext, history = [], userMessage, emit, signal, r
   const toolTrace = []
   const usage = { inputTokens: 0, outputTokens: 0 }
   let iterations = 0
+  let providerCalls = 0
   let text = ''
   let finishReason = null
   let retried = false
@@ -139,6 +140,7 @@ async function runTurn({ turnContext, history = [], userMessage, emit, signal, r
   try {
     while (iterations < maxIterations()) {
       iterations++
+      providerCalls++
 
       const pending = []
       let roundText = ''
@@ -172,13 +174,13 @@ async function runTurn({ turnContext, history = [], userMessage, emit, signal, r
         text += roundText
         if (signal && signal.aborted) {
           // Client disconnected. Nobody is listening; stop quietly (§14).
-          return { text, toolTrace, usage, iterations, finishReason: 'ABORTED' }
+          return { text, toolTrace, usage, iterations, providerCalls, finishReason: 'ABORTED' }
         }
         send('warning', {
           code: 'TURN_TIMEOUT',
           message: 'The turn exceeded its time limit. This answer is partial.',
         })
-        return { text, toolTrace, usage, iterations, finishReason: 'TIMEOUT' }
+        return { text, toolTrace, usage, iterations, providerCalls, finishReason: 'TIMEOUT' }
       }
 
       if (providerError) {
@@ -198,7 +200,7 @@ async function runTurn({ turnContext, history = [], userMessage, emit, signal, r
           message: providerError.error ? providerError.error.message : 'The model is unavailable',
           retryable: Boolean(providerError.retryable),
         })
-        return { text, toolTrace, usage, iterations, finishReason: 'ERROR' }
+        return { text, toolTrace, usage, iterations, providerCalls, finishReason: 'ERROR' }
       }
 
       text += roundText
@@ -256,7 +258,7 @@ async function runTurn({ turnContext, history = [], userMessage, emit, signal, r
       finishReason = 'ITERATION_CAP'
     }
 
-    return { text, toolTrace, usage, iterations, finishReason }
+    return { text, toolTrace, usage, iterations, providerCalls, finishReason }
   } finally {
     clearTimeout(timer)
   }

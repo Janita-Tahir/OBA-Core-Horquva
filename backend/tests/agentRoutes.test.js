@@ -24,18 +24,22 @@ function loadFresh(modulePath) {
 }
 
 async function main() {
-        console.log('\n=== OBA Core — Agent SSE Route Test ===\n')
+        console.log('\n=== OBA Core - Agent SSE Route Test ===\n')
 
         // Offline seams: no provider/network/database access.
         const turnContextPath = path.join(__dirname, '..', 'agent', 'turnContext.js')
         const providersPath = path.join(__dirname, '..', 'agent', 'providers', 'index.js')
         const loopPath = path.join(__dirname, '..', 'agent', 'loop.js')
+        const usageAccountingPath = path.join(__dirname, '..', 'agent', 'usageAccounting.js')
 
         const originalTurnContext = require.cache[require.resolve(turnContextPath)]
         const originalProviders = require.cache[require.resolve(providersPath)]
         const originalLoop = require.cache[require.resolve(loopPath)]
+        const originalUsageAccounting = require.cache[require.resolve(usageAccountingPath)]
 
         let abortObserved = false
+        let stubDailyCount = 0
+        let persistedUsage = null
 
         require.cache[require.resolve(turnContextPath)] = {
                 id: turnContextPath,
@@ -87,15 +91,29 @@ async function main() {
                                         return {
                                                 text: 'hello',
                                                 toolTrace: [],
+                                                providerCalls: 1,
+                                                usage: { inputTokens: 5, outputTokens: 2 },
                                         }
                                 }
 
                                 return {
                                         text: 'hello',
-                                        toolTrace: [],
+                                                toolTrace: [],
+                                                providerCalls: 1,
+                                                usage: { inputTokens: 5, outputTokens: 2 },
                                 }
                         },
                 },
+        }
+
+        require.cache[require.resolve(usageAccountingPath)] = {
+                id: usageAccountingPath,
+                filename: usageAccountingPath,
+                loaded: true,
+                exports: {
+                        getDailyTurnCount: async () => stubDailyCount,
+                        persistUsage: async (opts) => { persistedUsage = opts },
+                }
         }
 
         delete require.cache[require.resolve('../routes/agent/chat')]

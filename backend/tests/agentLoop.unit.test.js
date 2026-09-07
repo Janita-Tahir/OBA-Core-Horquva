@@ -134,6 +134,7 @@ async function main() {
 
     check('the answer text is returned', out.text === 'Org health is 62.', out.text)
     check('two rounds were used', out.iterations === 2, out.iterations)
+    check('two provider calls were made', out.providerCalls === 2, out.providerCalls)
     check('finishReason is STOP', out.finishReason === 'STOP', out.finishReason)
     check('usage is summed across rounds', out.usage.inputTokens === 383 && out.usage.outputTokens === 31, out.usage)
     check('tool_start precedes tool_done', rec.names().indexOf('tool_start') < rec.names().indexOf('tool_done'))
@@ -237,6 +238,7 @@ async function main() {
 
     check('the turn recovers', out.text === 'Recovered.', out.text)
     check('the retry is not counted as a step', out.iterations === 1, out.iterations)
+    check('the retry IS counted as a provider call', out.providerCalls === 2, out.providerCalls)
     check('the retry is visible', Boolean(rec.of('warning').find((w) => w.data.code === 'PROVIDER_RETRY')), rec.of('warning').map((w) => w.data.code))
     check('no error event once recovered', rec.of('error').length === 0, rec.names())
   }
@@ -288,6 +290,7 @@ async function main() {
     })
 
     check('finishReason is ABORTED', out.finishReason === 'ABORTED', out.finishReason)
+    check('provider was called', out.providerCalls === 1, out.providerCalls)
     check('a disconnected client gets no error event', rec.of('error').length === 0, rec.names())
     check('and no warning either — nobody is listening', rec.of('warning').filter((w) => w.data.code === 'TURN_TIMEOUT').length === 0)
   }
