@@ -31,7 +31,7 @@ services:
       - key: TOKEN_TTL
         value: 3600
       - key: AGENT_ENABLED
-  	value: "false"
+        value: "false"
       - key: AGENT_PROVIDER
         value: gemini
       - key: AGENT_MODEL
