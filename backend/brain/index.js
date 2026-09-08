@@ -30,7 +30,6 @@
  */
 
 const KnowledgeGraph = require('./knowledge/knowledgeGraph')
-const { loadFromSupabase } = require('./knowledge/graphLoader')
 const { createIntelligence, propagateConfidence } = require('./knowledge/intelligenceExchange')
 const { MODULES } = require('./data/constitutional-modules')
 const IMPL = require('./modules/implementations')
@@ -60,6 +59,7 @@ let source = { live: false, stats: null, loadedAt: null, error: null }
  * stale graph with nothing saying so.
  */
 async function loadGraph() {
+  const { loadFromSupabase } = require('./knowledge/graphLoader')
   const next = new KnowledgeGraph()
   try {
     await loadFromSupabase(next)
