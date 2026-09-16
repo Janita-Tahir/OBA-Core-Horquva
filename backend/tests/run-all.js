@@ -37,6 +37,7 @@ const tests = [
 	'simulationRoutes.test.js', // HTTP-level; stubs Supabase, so it runs offline (W-I)
 	'orgGuard.unit.test.js', // pure; asserts checkSingleTenant()'s logic offline
 	'agentData.unit.test.js', // Tasks 10.6 and 12.7 - turn context and page context
+	'navigationCatalog.unit.test.js', // Task 12.2 - navigation catalog and propose_navigation
 	'provider.unit.test.js',   // pure/stubbed; asserts adapter normalisation, error classes, abort (W-L 10.7)
 	'agentLoop.unit.test.js', // stubbed; six loop scenarios including cap, retry, abort and timeout (W-L 11.5)
 ]
