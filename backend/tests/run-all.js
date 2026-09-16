@@ -21,13 +21,24 @@ const tests = [
 	'simulations.unit.test.js', // pure; asserts cascade/severity/health-delta (W-I)
 	'simulationsReassign.unit.test.js', // pure; asserts the succession mutation policy (W-L 13.1, D-70)
 	'tools.unit.test.js', // pure; asserts tool-risk composite score/tier (W-K D-58)
+	'agentRegistry.unit.test.js',
+	'agentConstitution.unit.test.js',
+	'agentEntityValidator.unit.test.js',
+	'agentNumericValidator.unit.test.js',
+	'metricGlossary.unit.test.js',
+	'simulation-tools.unit.test.js',
+	'readTools.unit.test.js',
 	'definitions.unit.test.js', // pure; asserts the canonical criticality/SPOF definitions
 	'routeEvidence.unit.test.js', // pure; asserts evidence gating in routes outside derived.js
 	'authRoutes.test.js', // HTTP-level; stubs Supabase, so it runs offline
 	'graphRoutes.test.js', // HTTP-level; stubs brain, so it runs offline
+	'agentsRoutes.test.js', // HTTP-level; stubs Supabase, so it runs offline (DATA-1's first write path)
+	'realityRoutes.test.js', // HTTP-level; real brain + fixture graph, so it runs offline (M02/M03/M07/M28/M29/M31/M32/M34/M35/M49 wire-up)
 	'simulationRoutes.test.js', // HTTP-level; stubs Supabase, so it runs offline (W-I)
 	'orgGuard.unit.test.js', // pure; asserts checkSingleTenant()'s logic offline
 	'agentData.unit.test.js', // Tasks 10.6 and 12.7 - turn context and page context
+	'provider.unit.test.js',   // pure/stubbed; asserts adapter normalisation, error classes, abort (W-L 10.7)
+	'agentLoop.unit.test.js', // stubbed; six loop scenarios including cap, retry, abort and timeout (W-L 11.5)
 ]
 // api.smoke.test.js only runs when BASE_URL is set (otherwise localhost would fail).
 if (process.env.BASE_URL) tests.push('api.smoke.test.js')
