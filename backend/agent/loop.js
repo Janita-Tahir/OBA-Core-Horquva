@@ -87,7 +87,14 @@ function volatileBlock(ctx) {
     lines.push(`- Knowledge graph loaded at: ${ctx.graphSource.loadedAt} (a different snapshot from the data above)`)
   }
   if (ctx.graphStale) {
-    lines.push('- WARNING: the knowledge graph snapshot is stale. Say so plainly when you use graph-derived analysis.')
+    // Task 13.3, step 86: tell the model to attribute graph-derived figures
+    // to the graph's own load time, not to the roots snapshot.
+    const at = ctx.graphSource && ctx.graphSource.loadedAt
+    lines.push(
+      `- WARNING: the knowledge graph snapshot is stale${at ? ` (loaded ${at})` : ''}. ` +
+      "When you use graph-derived analysis, attribute those figures to the graph's load time " +
+      'and say plainly that they may not reflect the current data.'
+    )
   }
   if (ctx.pageContext) {
     lines.push(`- The user is currently looking at: ${ctx.pageContext}`)
@@ -119,6 +126,16 @@ async function runTurn({ turnContext, history = [], userMessage, emit, signal, r
 
   const built = buildFullConstitution(turnContext.roots)
   const systemInstruction = built.systemInstruction + volatileBlock(turnContext)
+
+  // Task 13.3, step 87: server-side only, once per turn, so operations can
+  // see when the agent is running against a stale graph snapshot.
+  if (turnContext.graphStale) {
+    console.warn('[agent] stale graph', {
+      snapshotAt: turnContext.snapshotAt,
+      graphLoadedAt: turnContext.graphSource?.loadedAt,
+    })
+  }
+
   if (!built.withinBudget) {
     // Not fatal, but the roster drifting out of budget is a real regression
     // and it should be visible rather than discovered later in a quota bill.
